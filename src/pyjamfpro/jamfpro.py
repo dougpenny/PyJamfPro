@@ -9,13 +9,14 @@
 # SPDX-License-Identifier: MIT
 #
 
+from dateutil.parser import isoparse
+from typing import Dict, List, Union
+from urllib.parse import urljoin
+from xml.etree import ElementTree
 import base64
 import datetime
 import json
 import sys
-from typing import Dict, List, Union
-from urllib.parse import urljoin
-from xml.etree import ElementTree
 
 from dict2xml import dict2xml
 import httpx
@@ -83,7 +84,7 @@ class Client(ClassicMixin, JamfProMixin):
         }
         r = httpx.post(token_url, headers=headers)
         response = r.json()
-        response["expiration_datetime"] = datetime.datetime.fromisoformat(response["expires"][:-1])
+        response["expiration_datetime"] = isoparse(response["expires"])
         self.access_token_response = response
         return "Bearer " + response["token"]
 
