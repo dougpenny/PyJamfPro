@@ -45,16 +45,12 @@ computers = await client.pro_computers()
 
 Refer to the [`endpoints.py`](./src/pyjamfpro/endpoints.py) file for other built-in methods. Additionally, you can use the [`fetch_data`](./src/pyjamfpro/jamfpro.py#L108) and [`fetch_paginated_data`](./src/pyjamfpro/jamfpro.py#L127) methods to access any Jamf API endpoint. Basic support for `POST` has been included through the [`post_data`](./src/pyjamfpro/jamfpro.py#L163) method.
 
----
-
 ## Contributing
 If you have a feature or idea you would like to see added to PyJamPro, please [create an issue](https://github.com/dougpenny/PyJamPro/issues/new) explaining your idea.
 
 Likewise, if you come across a bug, please [create an issue](https://github.com/dougpenny/PyJamPro/issues/new) explaining the bug with as much detail as possible.
 
 The Jamf Pro API provides access to a lot of information and, unfortunately, we don't have time to research and implement every endpoint. Please feel free to open a pull request with any additional endpoints you create. We would love to have as many of the core endpoints covered as possible.
-
----
 
 ## License
 PyJamPro is released under an MIT license. See [LICENSE](https://opensource.org/licenses/MIT) for more information.
