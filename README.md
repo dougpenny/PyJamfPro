@@ -5,7 +5,7 @@
 [![MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 
-PyJamfPro is a basic Python wrapper for asynchronous communication with the [Jamf Pro (and/or Classic) API](https://developer.jamf.com/jamf-pro/docs). The goal is to simplify the process of communicating with the [Jamf Pro](https://www.jamf.com/products/jamf-pro/) device management server API by handling authentication and decoding, allowing you to focus on using the data, not retrieving it.
+PyJamfPro is a basic Python wrapper for synchronous communication with the [Jamf Pro (and/or Classic) API](https://developer.jamf.com/jamf-pro/docs). The goal is to simplify the process of communicating with the [Jamf Pro](https://www.jamf.com/products/jamf-pro/) device management server API by handling authentication and decoding, allowing you to focus on using the data, not retrieving it.
 
 _PyJamfPro is not endorsed, sponsored, or affilitated with Jamf in any way._
 
@@ -30,20 +30,20 @@ from pyjamfpro import jamfpro
 client = jamfpro.Client('https://example.jamfserver.com', 'username', 'password')
 ```
 
-Once you have a client, you can start making asynchronous calls to the API.
+Once you have a client, you can start making synchronous calls to the API.
 ```python
 # returns list of all mobile devices, using the Classic API
-devices = await client.classic_mobile_devices()
+devices = client.classic_mobile_devices()
 
 # returns a dictionary of inventory data for the mobile device with ID 1234,
 # using the Classic API
-device = await client.classic_mobile_device_for_id(1234)
+device = client.classic_mobile_device_for_id(1234)
 
 # returns a list of all computers, using the Jamf Pro API
-computers = await client.pro_computers()
+computers = client.pro_computers()
 ```
 
-Refer to the [`endpoints.py`](./src/pyjamfpro/endpoints.py) file for other built-in methods. Additionally, you can use the [`fetch_data`](./src/pyjamfpro/jamfpro.py#L108) and [`fetch_paginated_data`](./src/pyjamfpro/jamfpro.py#L127) methods to access any Jamf API endpoint. Basic support for `POST` has been included through the [`post_data`](./src/pyjamfpro/jamfpro.py#L163) method.
+Refer to the [`endpoints.py`](./src/pyjamfpro/endpoints.py) file for other built-in methods. Additionally, you can use the [`make_api_request`](./src/pyjamfpro/jamfpro.py#L121) method to access any Jamf API endpoint. Full support for GET, POST, PUT, and DELETE are included.
 
 ## Contributing
 If you have a feature or idea you would like to see added to PyJamPro, please [create an issue](https://github.com/dougpenny/PyJamPro/issues/new) explaining your idea.
