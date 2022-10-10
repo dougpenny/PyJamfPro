@@ -54,27 +54,15 @@ class Client(ClassicMixin, JamfProMixin):
         self.base_url = url
         self.username = username.encode("UTF-8")
         self.password = password.encode("UTF-8")
-        try:
-            headers = {
-                "Accept": "application/json",
-                "Authorization": self._access_token(),
-                "User-Agent": "PyJamfPro/0.1.3"
-            }
-            self.session = requests.Session()
-            self.session.headers = headers
-        except requests.RequestException as e:
-            logging.error(f"An error occured making the request: {e}")
-        except requests.ConnectionError as e:
-            logging.error(f"A connection error occurred: {e}")
-        except requests.HTTPError as e:
-            logging.error(f"HTTP Status: {e.response.status_code}")
-            logging.error(f"Error details: {e}")
-        except requests.Timeout as e:
-            logging.error(f"A timeout error occured: {e}")
-        except Exception as e:
-            logging.error(f"An unknown error occured: {e}")
+        headers = {
+            "Accept": "application/json",
+            "Authorization": self._access_token(),
+            "User-Agent": "PyJamfPro/0.1.4"
+        }
+        self.session = requests.Session()
+        self.session.headers = headers
 
-    def _access_token(self) -> str:
+    def _access_token(self) -> Union[str, None]:
         """
         Fetches a valid access token.
 
@@ -94,10 +82,30 @@ class Client(ClassicMixin, JamfProMixin):
             "Authorization": auth_string,
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
         }
-        response = requests.post(token_url, headers=headers)
-        response.raise_for_status()
-        json_response = response.json()
-        json_response["expiration_datetime"] = isoparse(json_response["expires"])
+        try:
+            response = requests.post(token_url, headers=headers)
+            response.raise_for_status()
+            json_response = response.json()
+            json_response["expiration_datetime"] = isoparse(json_response["expires"])
+        except requests.RequestException as e:
+            logging.error(f"An error occured making the request: {e}")
+            return None
+        except requests.ConnectionError as e:
+            logging.error(f"A connection error occurred: {e}")
+            return None
+        except requests.HTTPError as e:
+            logging.error(f"HTTP Status: {e.response.status_code}")
+            logging.error(f"Error details: {e}")
+            return None
+        except requests.Timeout as e:
+            logging.error(f"A timeout error occured: {e}")
+            return None
+        except requests.exceptions.JSONDecodeError as e:
+            logging.error(f"A JSON decoding error occured: {e}")
+            return None
+        except Exception as e:
+            logging.error(f"An unknown error occured: {e}")
+            return None
         self.access_token_response = json_response
         return f"Bearer {json_response['token']}"
 
@@ -119,7 +127,7 @@ class Client(ClassicMixin, JamfProMixin):
         else:
             return True
 
-    def make_api_request(self, endpoint: str, method: HTTPMethod = HTTPMethod.GET, data: Union[bytes, str] = b"", classic: bool = False) -> requests.Response:
+    def make_api_request(self, endpoint: str, method: HTTPMethod = HTTPMethod.GET, data: Union[bytes, str] = b"", classic: bool = False) -> Union[requests.Response, None]:
         """
         Makes an API request to the Jamf Pro server.
 
@@ -145,30 +153,43 @@ class Client(ClassicMixin, JamfProMixin):
         else:
             self.session.headers["Content-Type"] = "application/json"
 
-        if method == HTTPMethod.POST:
-            response = self.session.post(endpoint_url, data=data)
-            response.raise_for_status()
-            return response
-        if method == HTTPMethod.PUT:
-            response = self.session.put(endpoint_url, data=data)
-            response.raise_for_status()
-            return response
-        if method == HTTPMethod.DELETE:
-            response = self.session.delete(endpoint_url)
-            response.raise_for_status()
-            return response
+        try:
+            if method == HTTPMethod.POST:
+                response = self.session.post(endpoint_url, data=data)
+                response.raise_for_status()
+                return response
+            if method == HTTPMethod.PUT:
+                response = self.session.put(endpoint_url, data=data)
+                response.raise_for_status()
+                return response
+            if method == HTTPMethod.DELETE:
+                response = self.session.delete(endpoint_url)
+                response.raise_for_status()
+                return response
 
-        response = self.session.get(endpoint_url)
-        response.raise_for_status()
-        if response.json().get("totalCount"):
-            total: int = response.json()["totalCount"]
-            data: List = response.json()["results"]
-            params: Dict = {}
-            params["page"] = 1
-            while len(data) < total:
-                next_page = self.session.get(endpoint_url, params=params)
-                data.extend(next_page.json()["results"])
-                params["page"] = params["page"] + 1
-            return data
-        else:
-            return response
+            response = self.session.get(endpoint_url)
+            response.raise_for_status()
+            if response.json().get("totalCount"):
+                total: int = response.json()["totalCount"]
+                data: List = response.json()["results"]
+                params: Dict = {}
+                params["page"] = 1
+                while len(data) < total:
+                    next_page = self.session.get(endpoint_url, params=params)
+                    data.extend(next_page.json()["results"])
+                    params["page"] = params["page"] + 1
+                return data
+            else:
+                return response
+        except requests.RequestException as e:
+            logging.error(f"An error occured making the request: {e}")
+        except requests.ConnectionError as e:
+            logging.error(f"A connection error occurred: {e}")
+        except requests.HTTPError as e:
+            logging.error(f"HTTP Status: {e.response.status_code}")
+            logging.error(f"Error details: {e}")
+        except requests.Timeout as e:
+            logging.error(f"A timeout error occured: {e}")
+        except Exception as e:
+            logging.error(f"An unknown error occured: {e}")
+        return None
