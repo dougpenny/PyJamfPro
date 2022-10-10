@@ -57,7 +57,7 @@ class Client(ClassicMixin, JamfProMixin):
         headers = {
             "Accept": "application/json",
             "Authorization": self._access_token(),
-            "User-Agent": "PyJamfPro/0.1.7"
+            "User-Agent": "PyJamfPro/0.1.8"
         }
         self.session = requests.Session()
         self.session.headers = headers
@@ -87,21 +87,21 @@ class Client(ClassicMixin, JamfProMixin):
             response.raise_for_status()
             json_response = response.json()
             json_response["expiration_datetime"] = isoparse(json_response["expires"])
-        except requests.RequestException as e:
-            logging.error(f"An error occured making the request: {e}")
-            return None
-        except requests.ConnectionError as e:
-            logging.error(f"A connection error occurred: {e}")
-            return None
         except requests.HTTPError as e:
             logging.error(f"HTTP Status: {e.response.status_code}")
             logging.error(f"Error details: {e}")
+            return None
+        except requests.ConnectionError as e:
+            logging.error(f"A connection error occurred: {e}")
             return None
         except requests.Timeout as e:
             logging.error(f"A timeout error occured: {e}")
             return None
         except requests.exceptions.JSONDecodeError as e:
             logging.error(f"A JSON decoding error occured: {e}")
+            return None
+        except requests.RequestException as e:
+            logging.error(f"An error occured making the request: {e}")
             return None
         except Exception as e:
             logging.error(f"An unknown error occured: {e}")
@@ -181,15 +181,18 @@ class Client(ClassicMixin, JamfProMixin):
                 return data
             else:
                 return response
-        except requests.RequestException as e:
-            logging.error(f"An error occured making the request: {e}")
+        except requests.HTTPError as e:
+            if e.response.status_code == 404:
+                logging.error(f"Resource not found for URL: {e.response.url}")
+            else:
+                logging.error(f"HTTP Status: {e.response.status_code}")
+            logging.error(f"Error details: {e}")
         except requests.ConnectionError as e:
             logging.error(f"A connection error occurred: {e}")
-        except requests.HTTPError as e:
-            logging.error(f"HTTP Status: {e.response.status_code}")
-            logging.error(f"Error details: {e}")
         except requests.Timeout as e:
             logging.error(f"A timeout error occured: {e}")
+        except requests.RequestException as e:
+            logging.error(f"An error occured making the request: {e}")
         except Exception as e:
             logging.error(f"An unknown error occured: {e}")
         return None
