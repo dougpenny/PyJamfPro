@@ -27,7 +27,7 @@ class ClassicMixin:
     https://developer.jamf.com/jamf-pro/docs/getting-started-2
     """
 
-    def classic_class_with_id(self, id: int) -> Dict:
+    def classic_class_with_id(self, id: int) -> Union[Dict, None]:
         """
         Retrieves the class with the given ID.
 
@@ -36,12 +36,13 @@ class ClassicMixin:
                 ID of the class to retrieve
 
         Returns:
-            A dictionary representing the retrieved class.
+            A dictionary representing the retrieved class or, if
+            an error occured, None.
         """
         class_data = self.make_api_request(f"JSSResource/classes/id/{id}")
         return class_data.json()["class"]
 
-    def classic_class_with_name(self, name: str) -> Dict:
+    def classic_class_with_name(self, name: str) -> Union[Dict, None]:
         """
         Retrieves the class with the given name.
 
@@ -50,17 +51,19 @@ class ClassicMixin:
                 Name of the class to retrieve
 
         Returns:
-            A dictionary representing the retrieved class.
+            A dictionary representing the retrieved class or, if
+            an error occured, None.
         """
         class_data = self.make_api_request(f"JSSResource/classes/name/{name}")
         return class_data.json()["class"]
 
-    def classic_classes(self) -> List:
+    def classic_classes(self) -> Union[List, None]:
         """
         Retrieves all classes.
 
         Returns:
-            A list of all classes currently in Jamf.
+            A list of all classes currently in Jamf or, if
+            an error occured, None.
         """
         class_data = self.make_api_request("JSSResource/classes")
         return class_data.json()["classes"]
@@ -77,7 +80,7 @@ class ClassicMixin:
             A boolean representing success or failure in deleting the class.
         """
         delete_response = self.make_api_request(f"JSSResource/classes/id/{id}", method=jamf.HTTPMethod.DELETE)
-        if delete_response.status_code == 200:
+        if delete_response.get('status_code') == 200:
             return True
         else:
             return False
@@ -94,12 +97,12 @@ class ClassicMixin:
             A boolean representing success or failure in deleting the class.
         """
         delete_response = self.make_api_request(f"JSSResource/classes/name/{name}", method=jamf.HTTPMethod.DELETE)
-        if delete_response.status_code == 200:
+        if delete_response.get('status_code') == 200:
             return True
         else:
             return False
 
-    def classic_new_class(self, new_class: Dict) -> Union[None, str]:
+    def classic_new_class(self, new_class: Dict) -> Union[str, None]:
         """
         Create a new class in Jamf Pro.
 
@@ -113,13 +116,13 @@ class ClassicMixin:
         """
         data = class_dict_to_xml(new_class)
         class_response: Response = self.make_api_request("JSSResource/classes/id/-1", data=data, method=jamf.HTTPMethod.POST, classic=True)
-        if class_response.status_code == 201:
+        if class_response.get('status_code') == 201:
             xml_data = ET.fromstring(class_response.text)
             return xml_data.findtext('id')
         else:
             return None
 
-    def classic_update_class_with_id(self, id: int, existing_class: Dict) -> Union[None, str]:
+    def classic_update_class_with_id(self, id: int, existing_class: Dict) -> Union[str, None]:
         """
         Updates the class with the given id.
 
@@ -135,13 +138,13 @@ class ClassicMixin:
         """
         data = class_dict_to_xml(existing_class)
         class_response: Response = self.make_api_request(f"JSSResource/classes/id/{id}", data=data, method=jamf.HTTPMethod.PUT, classic=True)
-        if class_response.status_code == 201:
+        if class_response.get('status_code') == 201:
             xml_data = ET.fromstring(class_response.text)
             return xml_data.findtext('id')
         else:
             return None
 
-    def classic_update_class_with_name(self, name: str, existing_class: Dict) -> Union[None, str]:
+    def classic_update_class_with_name(self, name: str, existing_class: Dict) -> Union[str, None]:
         """
         Updates the class with the given name.
 
@@ -157,13 +160,13 @@ class ClassicMixin:
         """
         data = class_dict_to_xml(existing_class)
         class_response: Response = self.make_api_request(f"JSSResource/classes/name/{name}", data=data, method=jamf.HTTPMethod.PUT, classic=True)
-        if class_response.status_code == 201:
+        if class_response.get('status_code') == 201:
             xml_data = ET.fromstring(class_response.text)
             return xml_data.findtext('id')
         else:
             return None
 
-    def classic_computer_for_id(self, id: int) -> Dict:
+    def classic_computer_for_id(self, id: int) -> Union[Dict, None]:
         """
         Retrieves the computer with the given ID.
 
@@ -172,7 +175,8 @@ class ClassicMixin:
                 ID of the computer to retrieve
 
         Returns:
-            A dictionary representing the retrieved computer.
+            A dictionary representing the retrieved computer or, if
+            an error occured, None.
         """
         computer_data = self.make_api_request(f"JSSResource/computers/id/{id}")
         return computer_data.json()["computer"]
@@ -182,12 +186,13 @@ class ClassicMixin:
         Retrieves all computers.
 
         Returns:
-            A list of all computers currently enrolled.
+            A list of all computers currently enrolled or, if
+            an error occured, None.
         """
         computer_data = self.make_api_request("JSSResource/computers")
         return computer_data.json()["computers"]
 
-    def classic_mobile_device_for_id(self, id: int) -> Dict:
+    def classic_mobile_device_for_id(self, id: int) -> Union[Dict, None]:
         """
         Retrieves the mobile device with the given ID.
 
@@ -196,22 +201,24 @@ class ClassicMixin:
                 ID of the mobile device to retrieve
 
         Returns:
-            A dictionary representing the retrieved mobile device.
+            A dictionary representing the retrieved mobile device or, if
+            an error occured, None.
         """
         device_data = self.make_api_request(f"JSSResource/mobiledevices/id/{id}")
         return device_data.json()["mobile_device"]
 
-    def classic_mobile_devices(self) -> List:
+    def classic_mobile_devices(self) -> Union[List, None]:
         """
         Retrieves all mobile devices.
 
         Returns:
-            A list of all mobile devices currently enrolled.
+            A list of all mobile devices currently enrolled or, if
+            an error occured, None.
         """
         device_data = self.make_api_request("JSSResource/mobiledevices")
         return device_data.json()["mobile_devices"]
 
-    def classic_search_mobile_devices_for(self, search_term: str) -> List:
+    def classic_search_mobile_devices_for(self, search_term: str) -> Union[List, None]:
         """
         Search for mobile devices that match the provided term.
 
@@ -220,7 +227,8 @@ class ClassicMixin:
                 Name, mac address, etc. to filter the search by
 
         Returns:
-            A list of the found mobile devices.
+            A list of the found mobile devices or, if
+            an error occured, None.
         """
         device_data = self.make_api_request(f"JSSResource/mobiledevices/match/{search_term}")
         return device_data.json()["mobile_devices"]
@@ -234,17 +242,18 @@ class JamfProMixin:
     https://developer.jamf.com/jamf-pro/docs/jamf-pro-api-overview
     """
 
-    def pro_computers(self) -> List:
+    def pro_computers(self) -> Union[List, None]:
         """
         Retrieves all computers.
 
         Returns:
-            A list of all computers currently enrolled.
+            A list of all computers currently enrolled or, if
+            an error occured, None.
         """
         device_data = self.make_api_request("api/v1/computers-inventory")
         return device_data
 
-    def pro_mobile_device_for_id(self, id: int, with_details: bool = False) -> Dict:
+    def pro_mobile_device_for_id(self, id: int, with_details: bool = False) -> Union[Dict, None]:
         """
         Retrieves the mobile device with the given ID.
 
@@ -255,7 +264,8 @@ class JamfProMixin:
                 If true, full device details are returned
 
         Returns:
-            A dictionary representing the retrieved mobile device.
+            A dictionary representing the retrieved mobile device or, if
+            an error occured, None.
         """
         endpoint_url = f"api/v2/mobile-devices/{id}"
         if with_details:
@@ -263,12 +273,13 @@ class JamfProMixin:
         device_data = self.make_api_request(endpoint_url)
         return device_data.json()
 
-    def pro_mobile_devices(self) -> List:
+    def pro_mobile_devices(self) -> Union[List, None]:
         """
         Retrieves all mobile devices.
 
         Returns:
-            A list of all mobile devices currently enrolled.
+            A list of all mobile devices currently enrolled or, if
+            an error occured, None.
         """
         device_data = self.make_api_request("api/v2/mobile-devices")
         return device_data
