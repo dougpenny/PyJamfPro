@@ -89,8 +89,9 @@ class ClassicMixin:
             A boolean representing success or failure in deleting the class.
         """
         delete_response = self.make_api_request(f"JSSResource/classes/id/{id}", method=jamf.HTTPMethod.DELETE)
-        if delete_response.get('status_code') == 200:
-            return True
+        if delete_response:
+            if delete_response.status_code == 200:
+                return True
         else:
             return False
 
@@ -106,8 +107,9 @@ class ClassicMixin:
             A boolean representing success or failure in deleting the class.
         """
         delete_response = self.make_api_request(f"JSSResource/classes/name/{name}", method=jamf.HTTPMethod.DELETE)
-        if delete_response.get('status_code') == 200:
-            return True
+        if delete_response:
+            if delete_response.status_code == 200:
+                return True
         else:
             return False
 
@@ -125,9 +127,10 @@ class ClassicMixin:
         """
         data = class_dict_to_xml(new_class)
         class_response: Response = self.make_api_request("JSSResource/classes/id/-1", data=data, method=jamf.HTTPMethod.POST, classic=True)
-        if class_response.get('status_code') == 201:
-            xml_data = ET.fromstring(class_response.text)
-            return xml_data.findtext('id')
+        if class_response:
+            if class_response.status_code == 201:
+                xml_data = ET.fromstring(class_response.text)
+                return xml_data.findtext('id')
         else:
             return None
 
@@ -147,9 +150,10 @@ class ClassicMixin:
         """
         data = class_dict_to_xml(existing_class)
         class_response: Response = self.make_api_request(f"JSSResource/classes/id/{id}", data=data, method=jamf.HTTPMethod.PUT, classic=True)
-        if class_response.get('status_code') == 201:
-            xml_data = ET.fromstring(class_response.text)
-            return xml_data.findtext('id')
+        if class_response:
+            if class_response.status_code == 201:
+                xml_data = ET.fromstring(class_response.text)
+                return xml_data.findtext('id')
         else:
             return None
 
@@ -169,9 +173,10 @@ class ClassicMixin:
         """
         data = class_dict_to_xml(existing_class)
         class_response: Response = self.make_api_request(f"JSSResource/classes/name/{name}", data=data, method=jamf.HTTPMethod.PUT, classic=True)
-        if class_response.get('status_code') == 201:
-            xml_data = ET.fromstring(class_response.text)
-            return xml_data.findtext('id')
+        if class_response:
+            if class_response.status_code == 201:
+                xml_data = ET.fromstring(class_response.text)
+                return xml_data.findtext('id')
         else:
             return None
 

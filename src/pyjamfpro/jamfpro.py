@@ -57,7 +57,7 @@ class Client(ClassicMixin, JamfProMixin):
         headers = {
             "Accept": "application/json",
             "Authorization": self._access_token(),
-            "User-Agent": "PyJamfPro/0.1.6"
+            "User-Agent": "PyJamfPro/0.1.7"
         }
         self.session = requests.Session()
         self.session.headers = headers
