@@ -40,7 +40,10 @@ class ClassicMixin:
             an error occured, None.
         """
         class_data = self.make_api_request(f"JSSResource/classes/id/{id}")
-        return class_data.json()["class"]
+        if class_data:
+            return class_data.json()["class"]
+        else:
+            return None
 
     def classic_class_with_name(self, name: str) -> Union[Dict, None]:
         """
@@ -55,7 +58,10 @@ class ClassicMixin:
             an error occured, None.
         """
         class_data = self.make_api_request(f"JSSResource/classes/name/{name}")
-        return class_data.json()["class"]
+        if class_data:
+            return class_data.json()["class"]
+        else:
+            return None
 
     def classic_classes(self) -> Union[List, None]:
         """
@@ -66,7 +72,10 @@ class ClassicMixin:
             an error occured, None.
         """
         class_data = self.make_api_request("JSSResource/classes")
-        return class_data.json()["classes"]
+        if class_data:
+            return class_data.json()["classes"]
+        else:
+            return None
 
     def classic_delete_class_with_id(self, id: int) -> bool:
         """
@@ -179,7 +188,10 @@ class ClassicMixin:
             an error occured, None.
         """
         computer_data = self.make_api_request(f"JSSResource/computers/id/{id}")
-        return computer_data.json()["computer"]
+        if computer_data:
+            return computer_data.json()["computer"]
+        else:
+            return None
 
     def classic_computers(self) -> List:
         """
@@ -190,7 +202,10 @@ class ClassicMixin:
             an error occured, None.
         """
         computer_data = self.make_api_request("JSSResource/computers")
-        return computer_data.json()["computers"]
+        if computer_data:
+            return computer_data.json()["computers"]
+        else:
+            return None
 
     def classic_mobile_device_for_id(self, id: int) -> Union[Dict, None]:
         """
@@ -205,7 +220,10 @@ class ClassicMixin:
             an error occured, None.
         """
         device_data = self.make_api_request(f"JSSResource/mobiledevices/id/{id}")
-        return device_data.json()["mobile_device"]
+        if device_data:
+            return device_data.json()["mobile_device"]
+        else:
+            return None
 
     def classic_mobile_devices(self) -> Union[List, None]:
         """
@@ -216,7 +234,10 @@ class ClassicMixin:
             an error occured, None.
         """
         device_data = self.make_api_request("JSSResource/mobiledevices")
-        return device_data.json()["mobile_devices"]
+        if device_data:
+            return device_data.json()["mobile_devices"]
+        else:
+            return None
 
     def classic_search_mobile_devices_for(self, search_term: str) -> Union[List, None]:
         """
@@ -231,7 +252,10 @@ class ClassicMixin:
             an error occured, None.
         """
         device_data = self.make_api_request(f"JSSResource/mobiledevices/match/{search_term}")
-        return device_data.json()["mobile_devices"]
+        if device_data:
+            return device_data.json()["mobile_devices"]
+        else:
+            return None
 
 
 class JamfProMixin:
@@ -271,7 +295,10 @@ class JamfProMixin:
         if with_details:
             endpoint_url = endpoint_url + "/detail"
         device_data = self.make_api_request(endpoint_url)
-        return device_data.json()
+        if device_data:
+            return device_data.json()
+        else:
+            return None
 
     def pro_mobile_devices(self) -> Union[List, None]:
         """
@@ -282,4 +309,7 @@ class JamfProMixin:
             an error occured, None.
         """
         device_data = self.make_api_request("api/v2/mobile-devices")
-        return device_data
+        if device_data:
+            return device_data
+        else:
+            return None
