@@ -20,14 +20,14 @@ pip install pyjamfpro
 
 In your code, simply import the PyJamfPro module and instantiate a new client object. The constructor requires three arguments:
 1. base_url - the base URL of your Jamf Pro server
-2. username
-3. password
-* _Note_: The Jamf Pro API uses the standard User Accounts and Groups functionality of Jamf Pro. You will need to ensure the account you use has the proper privilages for the actions you would like to perform with the API.
+2. client_id
+3. client_secret
+* _Note_: PyJamfPro uses [Client Credentials](https://developer.jamf.com/jamf-pro/docs/client-credentials) with your Jamf Pro server. You will need to ensure an [API Client](https://learn.jamf.com/en-US/bundle/jamf-pro-documentation-current/page/API_Roles_and_Clients.html) has been created with the correct permissions for the actions you would like to perform with the API.
 
 ```python
 from pyjamfpro import jamfpro
 
-client = jamfpro.Client('https://example.jamfserver.com', 'username', 'password')
+client = jamfpro.Client('https://example.jamfserver.com', 'client_id', 'client_secret')
 ```
 
 Once you have a client, you can start making synchronous calls to the API.
