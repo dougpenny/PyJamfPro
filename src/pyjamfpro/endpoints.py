@@ -1,7 +1,7 @@
 #
 # endpoints.py
 #
-# Copyright (c) 2022 Doug Penny
+# Copyright (c) 2024 Doug Penny
 # Licensed under MIT
 #
 # See LICENSE.md for license information
@@ -88,7 +88,9 @@ class ClassicMixin:
         Returns:
             A boolean representing success or failure in deleting the class.
         """
-        delete_response = self.make_api_request(f"JSSResource/classes/id/{id}", method=jamf.HTTPMethod.DELETE)
+        delete_response = self.make_api_request(
+            f"JSSResource/classes/id/{id}", method=jamf.HTTPMethod.DELETE
+        )
         if delete_response:
             if delete_response.status_code == 200:
                 return True
@@ -106,7 +108,9 @@ class ClassicMixin:
         Returns:
             A boolean representing success or failure in deleting the class.
         """
-        delete_response = self.make_api_request(f"JSSResource/classes/name/{name}", method=jamf.HTTPMethod.DELETE)
+        delete_response = self.make_api_request(
+            f"JSSResource/classes/name/{name}", method=jamf.HTTPMethod.DELETE
+        )
         if delete_response:
             if delete_response.status_code == 200:
                 return True
@@ -126,11 +130,13 @@ class ClassicMixin:
             otherwise, None.
         """
         data = class_dict_to_xml(new_class)
-        class_response: Response = self.make_api_request("JSSResource/classes/id/-1", data=data, method=jamf.HTTPMethod.POST, classic=True)
+        class_response: Response = self.make_api_request(
+            "JSSResource/classes/id/-1", data=data, method=jamf.HTTPMethod.POST, classic=True
+        )
         if class_response:
             if class_response.status_code == 201:
                 xml_data = ET.fromstring(class_response.text)
-                return xml_data.findtext('id')
+                return xml_data.findtext("id")
         else:
             return None
 
@@ -149,15 +155,19 @@ class ClassicMixin:
             otherwise, None.
         """
         data = class_dict_to_xml(existing_class)
-        class_response: Response = self.make_api_request(f"JSSResource/classes/id/{id}", data=data, method=jamf.HTTPMethod.PUT, classic=True)
+        class_response: Response = self.make_api_request(
+            f"JSSResource/classes/id/{id}", data=data, method=jamf.HTTPMethod.PUT, classic=True
+        )
         if class_response:
             if class_response.status_code == 201:
                 xml_data = ET.fromstring(class_response.text)
-                return xml_data.findtext('id')
+                return xml_data.findtext("id")
         else:
             return None
 
-    def classic_update_class_with_name(self, name: str, existing_class: Dict) -> Union[str, None]:
+    def classic_update_class_with_name(
+        self, name: str, existing_class: Dict
+    ) -> Union[str, None]:
         """
         Updates the class with the given name.
 
@@ -172,11 +182,16 @@ class ClassicMixin:
             otherwise, None.
         """
         data = class_dict_to_xml(existing_class)
-        class_response: Response = self.make_api_request(f"JSSResource/classes/name/{name}", data=data, method=jamf.HTTPMethod.PUT, classic=True)
+        class_response: Response = self.make_api_request(
+            f"JSSResource/classes/name/{name}",
+            data=data,
+            method=jamf.HTTPMethod.PUT,
+            classic=True,
+        )
         if class_response:
             if class_response.status_code == 201:
                 xml_data = ET.fromstring(class_response.text)
-                return xml_data.findtext('id')
+                return xml_data.findtext("id")
         else:
             return None
 
@@ -282,7 +297,9 @@ class JamfProMixin:
         device_data = self.make_api_request("api/v1/computers-inventory")
         return device_data
 
-    def pro_mobile_device_for_id(self, id: int, with_details: bool = False) -> Union[Dict, None]:
+    def pro_mobile_device_for_id(
+        self, id: int, with_details: bool = False
+    ) -> Union[Dict, None]:
         """
         Retrieves the mobile device with the given ID.
 

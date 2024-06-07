@@ -1,7 +1,7 @@
 #
 # jamfpro.py
 #
-# Copyright (c) 2022 Doug Penny
+# Copyright (c) 2024 Doug Penny
 # Licensed under MIT
 #
 # See LICENSE.md for license information
@@ -9,55 +9,49 @@
 # SPDX-License-Identifier: MIT
 #
 
-import base64
-import datetime
 import logging
 
 from enum import Enum
+from time import time
 from typing import Dict, List, Union
-from urllib.parse import urljoin
+from urllib.parse import urljoin, quote
 
 import requests
 
-from dateutil import tz
-from dateutil.parser import isoparse
 from pyjamfpro.endpoints import ClassicMixin, JamfProMixin
 
 
-HTTPMethod = Enum(
-    "HTTPMethod", ["GET", "POST", "PUT", "DELETE"]
-)
+HTTPMethod = Enum("HTTPMethod", ["GET", "POST", "PUT", "DELETE"])
 
 
 class Client(ClassicMixin, JamfProMixin):
     """
     The Client object handles requests to a Jamf Pro server.
-    Requests are made asynchronously when possible.
 
     Public Methods:
         fetch_data(self, endpoint: str, params: Dict[str, str] = {}) -> Dict
         post_data(self, endpoint: str, post_data: Dict) -> Union[None, int]
     """
 
-    def __init__(self, url: str, username: str, password: str) -> None:
+    def __init__(self, url: str, client_id: str, client_secret: str) -> None:
         """
         Initializes a new Client object.
 
         Args:
-            base_url:
+            url:
                 The base URL of the Jamf Pro server
-            username:
+            client_id:
                 Username of the Jamf Pro user to connect as
-            password:
+            client_secret:
                 Password of the Jamf Pro user to connect as
         """
         self.base_url = url
-        self.username = username.encode("UTF-8")
-        self.password = password.encode("UTF-8")
+        self.client_id = quote(client_id)
+        self.client_secret = quote(client_secret)
         headers = {
             "Accept": "application/json",
             "Authorization": self._access_token(),
-            "User-Agent": "PyJamfPro/0.1.9"
+            "User-Agent": "PyJamfPro/0.2.0",
         }
         self.session = requests.Session()
         self.session.headers = headers
@@ -72,21 +66,23 @@ class Client(ClassicMixin, JamfProMixin):
             A string to be used as the value of the HTTP Authorization header.
         """
         if hasattr(self, "access_token_response"):
-            if self.access_token_response["expiration_datetime"] > datetime.datetime.now(tz.UTC):
-                return f"Bearer {self.access_token_response['token']}"
-        token_url = self.base_url + "/api/v1/auth/token"
-        credentials = base64.b64encode(self.username + b":" + self.password)
-        auth_string = f"Basic {str(credentials, encoding='utf8')}"
+            if self.access_token_response["expiration_epoch"] > time():
+                return f'Bearer {self.access_token_response["access_token"]}'
+        token_url = self.base_url + "/api/oauth/token"
+        params = {
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "grant_type": "client_credentials",
+        }
         headers = {
             "Accept": "application/json",
-            "Authorization": auth_string,
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
         }
         try:
-            response = requests.post(token_url, headers=headers)
+            response = requests.post(token_url, headers=headers, params=params)
             response.raise_for_status()
             json_response = response.json()
-            json_response["expiration_datetime"] = isoparse(json_response["expires"])
+            json_response["expiration_epoch"] = time() + json_response["expires_in"] - 1
         except requests.RequestException as e:
             logging.error(f"An error occured making the request: {e}")
             return None
@@ -94,7 +90,7 @@ class Client(ClassicMixin, JamfProMixin):
             logging.error(f"An unknown error occured: {e}")
             return None
         self.access_token_response = json_response
-        return f"Bearer {json_response['token']}"
+        return f'Bearer {json_response["access_token"]}'
 
     def _access_token_expired(self) -> bool:
         """
@@ -107,14 +103,20 @@ class Client(ClassicMixin, JamfProMixin):
             False if the token exists and is valid.
         """
         if hasattr(self, "access_token_response"):
-            if self.access_token_response["expiration_datetime"] > datetime.datetime.now(tz.UTC):
+            if self.access_token_response["expiration_epoch"] > time():
                 return False
             else:
                 return True
         else:
             return True
 
-    def make_api_request(self, endpoint: str, method: HTTPMethod = HTTPMethod.GET, data: Union[bytes, str] = b"", classic: bool = False) -> Union[requests.Response, None]:
+    def make_api_request(
+        self,
+        endpoint: str,
+        method: HTTPMethod = HTTPMethod.GET,
+        data: Union[bytes, str] = b"",
+        classic: bool = False,
+    ) -> Union[requests.Response, None]:
         """
         Makes an API request to the Jamf Pro server.
 
