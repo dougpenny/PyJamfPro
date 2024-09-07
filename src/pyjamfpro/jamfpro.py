@@ -14,7 +14,7 @@ import logging
 from enum import Enum
 from time import time
 from typing import Dict, List, Union
-from urllib.parse import urljoin, quote
+from urllib.parse import urlencode, urljoin, quote
 
 import requests
 
@@ -41,9 +41,9 @@ class Client(ClassicMixin, JamfProMixin):
             url:
                 The base URL of the Jamf Pro server
             client_id:
-                Username of the Jamf Pro user to connect as
+                Client ID of the Jamf Pro API client to connect as
             client_secret:
-                Password of the Jamf Pro user to connect as
+                Client secret of the Jamf Pro API client to connect as
         """
         self.base_url = url
         self.client_id = quote(client_id)
@@ -69,17 +69,19 @@ class Client(ClassicMixin, JamfProMixin):
             if self.access_token_response["expiration_epoch"] > time():
                 return f'Bearer {self.access_token_response["access_token"]}'
         token_url = self.base_url + "/api/oauth/token"
-        params = {
-            "client_id": self.client_id,
-            "client_secret": self.client_secret,
-            "grant_type": "client_credentials",
-        }
+        credential_data = urlencode(
+            {
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+                "grant_type": "client_credentials",
+            }
+        )
         headers = {
             "Accept": "application/json",
-            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+            "Content-Type": "application/x-www-form-urlencoded",
         }
         try:
-            response = requests.post(token_url, headers=headers, params=params)
+            response = requests.post(token_url, headers=headers, data=credential_data)
             response.raise_for_status()
             json_response = response.json()
             json_response["expiration_epoch"] = time() + json_response["expires_in"] - 1

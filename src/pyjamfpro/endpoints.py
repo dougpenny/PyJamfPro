@@ -131,7 +131,10 @@ class ClassicMixin:
         """
         data = class_dict_to_xml(new_class)
         class_response: Response = self.make_api_request(
-            "JSSResource/classes/id/-1", data=data, method=jamf.HTTPMethod.POST, classic=True
+            "JSSResource/classes/id/-1",
+            data=data,
+            method=jamf.HTTPMethod.POST,
+            classic=True,
         )
         if class_response:
             if class_response.status_code == 201:
@@ -140,7 +143,9 @@ class ClassicMixin:
         else:
             return None
 
-    def classic_update_class_with_id(self, id: int, existing_class: Dict) -> Union[str, None]:
+    def classic_update_class_with_id(
+        self, id: int, existing_class: Dict
+    ) -> Union[str, None]:
         """
         Updates the class with the given id.
 
@@ -156,7 +161,10 @@ class ClassicMixin:
         """
         data = class_dict_to_xml(existing_class)
         class_response: Response = self.make_api_request(
-            f"JSSResource/classes/id/{id}", data=data, method=jamf.HTTPMethod.PUT, classic=True
+            f"JSSResource/classes/id/{id}",
+            data=data,
+            method=jamf.HTTPMethod.PUT,
+            classic=True,
         )
         if class_response:
             if class_response.status_code == 201:
@@ -271,7 +279,9 @@ class ClassicMixin:
             A list of the found mobile devices or, if
             an error occured, None.
         """
-        device_data = self.make_api_request(f"JSSResource/mobiledevices/match/{search_term}")
+        device_data = self.make_api_request(
+            f"JSSResource/mobiledevices/match/{search_term}"
+        )
         if device_data:
             return device_data.json()["mobile_devices"]
         else:
